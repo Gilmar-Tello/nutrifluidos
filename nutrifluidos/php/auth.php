@@ -92,8 +92,13 @@ if (!defined('NF_AUTH_CARGADO')) {
      *   suspendido (bool), dias (int|null: días que faltan para el pago; negativo = vencido), motivo.
      * Falla en abierto: si la tabla no existe o la BD no responde NO se bloquea a nadie
      * (un error técnico no debe cortarle el negocio al cliente); se deja constancia en el log.
-     * Los días los calcula MySQL con DATEDIFF sobre fechas (sin horas) y con la zona
-     * horaria de Guatemala que fija conexion.php: la fecha de pago vale hasta las 23:59.
+     * Los días se calculan aquí en PHP, SIEMPRE con la hora de Guatemala (America/Guatemala,
+     * UTC-6, sin horario de verano), sin depender de la zona horaria de MySQL ni del servidor.
+     * La fecha de pago vale hasta las 23:59 de ese día.
+     * 04-11-2026: suspensión AUTOMÁTICA: pasada la fecha de pago (dias < 0) el servicio queda
+     * suspendido sin días de gracia. Para reactivar basta mover fecha_pago hacia adelante
+     * (no se escribe nada en estado; la suspensión por fecha se calcula en cada petición).
+     * La suspensión manual (estado = 0) sigue funcionando igual.
      */
     function nf_estadoServicio()
     {
@@ -110,19 +115,44 @@ if (!defined('NF_AUTH_CARGADO')) {
                 require_once __DIR__ . '/../../../privado/conexion.php';
             }
             $r = $conexion->query(
-                "SELECT estado, motivo, DATEDIFF(fecha_pago, CURDATE()) AS dias
-                   FROM servicio_estado WHERE id = 1 LIMIT 1"
+                "SELECT estado, motivo, fecha_pago FROM servicio_estado WHERE id = 1 LIMIT 1"
             );
             $f = $r ? $r->fetch_assoc() : null;
             if ($f) {
                 $estado['suspendido'] = ((int)$f['estado'] === 0);
-                $estado['dias']       = ($f['dias'] === null) ? null : (int)$f['dias'];
                 $estado['motivo']     = (string)($f['motivo'] ?? '');
+                $dias = nf_diasParaPago($f['fecha_pago'] ?? null);
+                $estado['dias'] = $dias;
+                // Suspensión automática: ya pasó la fecha de pago (desde las 00:00 del día siguiente)
+                if ($dias !== null && $dias < 0) {
+                    $estado['suspendido'] = true;
+                    if ($estado['motivo'] === '') {
+                        $estado['motivo'] = 'Fecha de pago vencida';
+                    }
+                }
             }
         } catch (Throwable $e) {
             error_log('[NutriFluidos] No se pudo leer servicio_estado (se deja trabajar): ' . $e->getMessage());
         }
         return $estado;
+    }
+
+    /**
+     * Días que faltan para la fecha de pago, con la fecha de HOY en Guatemala.
+     * 0 = vence hoy (vale hasta las 23:59); negativo = ya venció; null = sin fecha o inválida.
+     */
+    function nf_diasParaPago($fechaPago)
+    {
+        if ($fechaPago === null || $fechaPago === '') {
+            return null;
+        }
+        $tz  = new DateTimeZone('America/Guatemala');
+        $pago = DateTimeImmutable::createFromFormat('!Y-m-d', substr((string)$fechaPago, 0, 10), $tz);
+        if (!$pago) {
+            return null;
+        }
+        $hoy = new DateTimeImmutable('today', $tz);
+        return (int)$hoy->diff($pago)->format('%r%a');
     }
 
     function nf_plural($n, $uno, $varios)
@@ -148,7 +178,8 @@ if (!defined('NF_AUTH_CARGADO')) {
                     'mensaje' => 'Faltan ' . nf_plural($d, 'día', 'días') . ' para su fecha de pago.'];
         }
         if ($d === 0) {
-            return ['nivel' => 'aviso', 'dias' => 0, 'mensaje' => 'Su pago vence hoy.'];
+            return ['nivel' => 'aviso', 'dias' => 0,
+                    'mensaje' => 'Su pago vence hoy. El servicio se suspenderá a las 11:59 p. m. si no se realiza.'];
         }
         $v = abs($d);
         return ['nivel' => 'vencido', 'dias' => $d,
