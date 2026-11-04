@@ -83,6 +83,8 @@ document.addEventListener('DOMContentLoaded', function() {
                     // Guardar información de la sesión
                     localStorage.setItem('isLoggedIn', 'true');
                     localStorage.setItem('userData', JSON.stringify(data.data.usuario));
+                    // El aviso de pago se muestra una sola vez, al iniciar sesión
+                    localStorage.setItem('nfAvisoPagoPendiente', 'true');
                     
                     // Redirigir después de un breve retraso
                     setTimeout(() => {

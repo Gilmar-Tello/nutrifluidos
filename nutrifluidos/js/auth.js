@@ -33,7 +33,13 @@ function nfMostrarAvisoPago(aviso) {
         + (vencido
             ? 'background:#f8d7da;color:#842029;border:1px solid #f5c2c7;'
             : 'background:#fff3cd;color:#664d03;border:1px solid #ffecb5;');
+    caja.style.transition = 'opacity .5s ease';
     document.body.appendChild(caja);
+    // El aviso se muestra 10 segundos y luego se desvanece y se quita solo
+    setTimeout(function () {
+        caja.style.opacity = '0';
+        setTimeout(function () { caja.remove(); }, 500);
+    }, 10000);
 }
 
 (function instalarInterceptorSesion() {
@@ -151,7 +157,13 @@ function sincronizarSesionConServidor() {
             nfRedirigirLogin(!!data.servicio_suspendido);
             throw new Error('Sesión no activa');
         }
-        nfMostrarAvisoPago(data.aviso_pago);
+        // Solo se muestra una vez, justo después de iniciar sesión
+        let avisoPendiente = false;
+        try { avisoPendiente = localStorage.getItem('nfAvisoPagoPendiente') === 'true'; } catch (e) {}
+        if (avisoPendiente) {
+            try { localStorage.removeItem('nfAvisoPagoPendiente'); } catch (e) {}
+            nfMostrarAvisoPago(data.aviso_pago);
+        }
         return data;
     });
 }
