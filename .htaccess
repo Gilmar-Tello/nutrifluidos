@@ -1,0 +1,175 @@
+# =====================================================
+# NUTRIFLUIDOS - Configuración Apache Optimizada
+# =====================================================
+
+# ------------------- SEGURIDAD -------------------
+
+# Prevenir listado de directorios
+Options -Indexes
+
+# Proteger archivos sensibles
+<FilesMatch "(conexion|config|\.env)\.php$">
+    Order Deny,Allow
+    Deny from all
+</FilesMatch>
+
+# Proteger archivos de configuración y logs
+<FilesMatch "\.(log|ini|conf|bak|sql)$">
+    Order Deny,Allow
+    Deny from all
+</FilesMatch>
+
+# Prevenir acceso a carpetas ocultas (.git, etc)
+RedirectMatch 404 /\..*$
+
+# Protección contra inyección de código
+<IfModule mod_rewrite.c>
+    RewriteEngine On
+    
+    # Bloquear intentos comunes de inyección SQL o XSS
+    RewriteCond %{QUERY_STRING} base64_encode.*\(.*\) [NC,OR]
+    RewriteCond %{QUERY_STRING} union([^s]*s)+elect [NC,OR]
+    RewriteCond %{QUERY_STRING} concat[^\(]*\( [NC,OR]
+    RewriteCond %{QUERY_STRING} (<|%3C).*script.*(>|%3E) [NC]
+    RewriteRule ^(.*)$ - [F,L]
+</IfModule>
+
+# Deshabilitar firma del servidor
+ServerSignature Off
+
+# Headers de seguridad
+<IfModule mod_headers.c>
+    # Prevenir clickjacking
+    Header always set X-Frame-Options "SAMEORIGIN"
+    
+    # Prevenir MIME sniffing
+    Header always set X-Content-Type-Options "nosniff"
+    
+    # Habilitar filtro XSS
+    Header always set X-XSS-Protection "1; mode=block"
+    
+    # Política de referrer
+    Header always set Referrer-Policy "strict-origin-when-cross-origin"
+    
+    # ------------------ Content Security Policy ------------------
+    # Permite recursos desde CDNs confiables y mantiene alta seguridad
+    Header always set Content-Security-Policy "default-src 'self'; script-src 'self' 'unsafe-inline' 'unsafe-eval' https://cdn.jsdelivr.net https://cdnjs.cloudflare.com https://cdn.datatables.net https://code.jquery.com https://cdn.jsdelivr.net/npm; style-src 'self' 'unsafe-inline' https://cdn.jsdelivr.net https://cdnjs.cloudflare.com https://cdn.datatables.net https://code.jquery.com https://fonts.googleapis.com; font-src 'self' data: https://cdnjs.cloudflare.com https://cdn.datatables.net https://fonts.gstatic.com https://code.jquery.com; img-src 'self' data: https:; connect-src 'self' https://cdn.datatables.net;"
+</IfModule>
+
+# Limitar tamaño de subida
+php_value upload_max_filesize 10M
+php_value post_max_size 10M
+
+# Tiempo máximo de ejecución
+php_value max_execution_time 300
+php_value max_input_time 300
+
+# ------------------- CACHÉ -------------------
+
+<IfModule mod_expires.c>
+    ExpiresActive On
+    
+    # Archivos que cambian frecuentemente
+    ExpiresByType text/html "access plus 0 seconds"
+    ExpiresByType application/json "access plus 0 seconds"
+    ExpiresByType application/xml "access plus 0 seconds"
+    
+    # CSS y JS - caché corto
+    ExpiresByType text/css "access plus 1 hour"
+    ExpiresByType application/javascript "access plus 1 hour"
+    ExpiresByType text/javascript "access plus 1 hour"
+    
+    # Imágenes - caché largo
+    ExpiresByType image/png "access plus 1 month"
+    ExpiresByType image/jpg "access plus 1 month"
+    ExpiresByType image/jpeg "access plus 1 month"
+    ExpiresByType image/gif "access plus 1 month"
+    ExpiresByType image/webp "access plus 1 month"
+    ExpiresByType image/svg+xml "access plus 1 month"
+    ExpiresByType image/x-icon "access plus 1 year"
+    
+    # Fuentes - caché largo
+    ExpiresByType font/ttf "access plus 1 year"
+    ExpiresByType font/otf "access plus 1 year"
+    ExpiresByType font/woff "access plus 1 year"
+    ExpiresByType font/woff2 "access plus 1 year"
+    ExpiresByType application/font-woff "access plus 1 year"
+</IfModule>
+
+<IfModule mod_headers.c>
+    # Archivos PHP y HTML sin caché
+    <FilesMatch "\.(php|html)$">
+        Header set Cache-Control "no-cache, no-store, must-revalidate"
+        Header set Pragma "no-cache"
+        Header set Expires "0"
+    </FilesMatch>
+    
+    # CSS y JS - caché con revalidación
+    <FilesMatch "\.(css|js)$">
+        Header set Cache-Control "public, max-age=3600, must-revalidate"
+        Header unset ETag
+        FileETag None
+    </FilesMatch>
+    
+    # Imágenes - caché largo
+    <FilesMatch "\.(jpg|jpeg|png|gif|ico|svg|webp)$">
+        Header set Cache-Control "public, max-age=2592000"
+    </FilesMatch>
+    
+    # Fuentes - caché muy largo
+    <FilesMatch "\.(ttf|otf|woff|woff2|eot)$">
+        Header set Cache-Control "public, max-age=31536000, immutable"
+    </FilesMatch>
+</IfModule>
+
+# Evitar caché en archivos PHP
+<Files "*.php">
+    Header set Cache-Control "no-cache, no-store, must-revalidate"
+    Header set Pragma "no-cache"
+    Header set Expires "0"
+</Files>
+
+# ------------------- COMPRESIÓN -------------------
+
+<IfModule mod_deflate.c>
+    AddOutputFilterByType DEFLATE text/html
+    AddOutputFilterByType DEFLATE text/css
+    AddOutputFilterByType DEFLATE text/javascript
+    AddOutputFilterByType DEFLATE application/javascript
+    AddOutputFilterByType DEFLATE application/x-javascript
+    AddOutputFilterByType DEFLATE application/json
+    AddOutputFilterByType DEFLATE application/xml
+    AddOutputFilterByType DEFLATE text/xml
+    AddOutputFilterByType DEFLATE text/plain
+    AddOutputFilterByType DEFLATE image/svg+xml
+    
+    # Excluir archivos ya comprimidos
+    SetEnvIfNoCase Request_URI \.(?:gif|jpe?g|png|zip|gz|rar)$ no-gzip
+</IfModule>
+
+# ------------------- OPTIMIZACIÓN -------------------
+
+<IfModule mod_headers.c>
+    Header set Connection keep-alive
+</IfModule>
+
+# UTF-8 por defecto
+AddDefaultCharset UTF-8
+AddCharset UTF-8 .html .css .js .xml .json .rss .atom
+
+# ------------------- ERRORES PERSONALIZADOS -------------------
+# ErrorDocument 404 /404.html
+# ErrorDocument 403 /403.html
+# ErrorDocument 500 /500.html
+
+# ------------------- PROTECCIÓN ADICIONAL -------------------
+
+<Files .htaccess>
+    Order allow,deny
+    Deny from all
+</Files>
+
+<FilesMatch "\.(bak|config|sql|fla|psd|ini|log|sh|inc|swp|dist)$">
+    Order allow,deny
+    Deny from all
+</FilesMatch>

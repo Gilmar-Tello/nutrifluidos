@@ -1,0 +1,86 @@
+# ============================================================
+# Nutri-Fluidos — .gitignore  (el repo se inicia DENTRO de public_html)
+# ------------------------------------------------------------
+# Regla general: lo que el sistema crea o los usuarios suben (fotos de
+# productos, PDFs, comprobantes) NO va al repo: vive solo en el servidor.
+# Se conserva el .htaccess de cada carpeta de subidas porque es lo que
+# impide ejecutar PHP ahí (seguridad) y deja la carpeta creada al desplegar.
+# ============================================================
+
+# ---------- Carpetas de archivos subidos / generados por el sistema ----------
+# (todo su contenido se ignora, EXCEPTO los .htaccess)
+
+# Fotos de productos y soportes de facturas/abonos
+nutrifluidos/imagenes/productos/**
+nutrifluidos/imagenes/facturas_pagar/**
+nutrifluidos/imagenes/abonos_facturas/**
+
+# PDFs de ventas, recibos de abono, informes y reportes
+nutrifluidos/php/facturas/**
+nutrifluidos/php/comprobantes_pdf/**
+nutrifluidos/php/reportes_pdf/**
+nutrifluidos/facturas/**
+nutrifluidos/comprobantes_pdf/**
+nutrifluidos/reportes_pdf/**
+nutrifluidos/informes/**
+
+# Comprobantes de pago y fotos de entrega subidos por los usuarios
+nutrifluidos/php/comprobantes/**
+nutrifluidos/php/uploads/**
+nutrifluidos/php/imagenes/**
+nutrifluidos/comprobantes/**
+nutrifluidos/uploads/**
+
+# Re-incluir subcarpetas y los .htaccess de las carpetas anteriores
+!nutrifluidos/imagenes/**/
+!nutrifluidos/php/**/
+!nutrifluidos/facturas/**/
+!nutrifluidos/comprobantes_pdf/**/
+!nutrifluidos/reportes_pdf/**/
+!nutrifluidos/informes/**/
+!nutrifluidos/comprobantes/**/
+!nutrifluidos/uploads/**/
+!nutrifluidos/imagenes/productos/**/.htaccess
+!nutrifluidos/imagenes/facturas_pagar/**/.htaccess
+!nutrifluidos/imagenes/abonos_facturas/**/.htaccess
+!nutrifluidos/php/facturas/**/.htaccess
+!nutrifluidos/php/comprobantes_pdf/**/.htaccess
+!nutrifluidos/php/reportes_pdf/**/.htaccess
+!nutrifluidos/php/comprobantes/**/.htaccess
+!nutrifluidos/php/uploads/**/.htaccess
+!nutrifluidos/php/imagenes/**/.htaccess
+!nutrifluidos/facturas/**/.htaccess
+!nutrifluidos/comprobantes_pdf/**/.htaccess
+!nutrifluidos/reportes_pdf/**/.htaccess
+!nutrifluidos/informes/**/.htaccess
+!nutrifluidos/comprobantes/**/.htaccess
+!nutrifluidos/uploads/**/.htaccess
+
+# ---------- Secretos y credenciales (nunca al repo) ----------
+conexion.php
+.env
+.env.*
+config.local.php
+privado/
+
+# ---------- Respaldos y volcados de base de datos ----------
+*.sql
+*.sql.gz
+*.zip
+*.bak
+*.old
+respaldos/
+_ELIMINAR*/
+
+# ---------- Logs ----------
+*.log
+error_log
+php_errors.log
+
+# ---------- Editor / sistema operativo ----------
+.vscode/
+.idea/
+.trash/
+.DS_Store
+Thumbs.db
+desktop.ini

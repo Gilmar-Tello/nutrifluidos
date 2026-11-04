@@ -1,0 +1,103 @@
+/* Variables de colores */
+:root {
+    --primary-color: #1e3a8a;
+    --secondary-color: #10b981;
+    --accent-color: #3b82f6;
+    --light-bg: #f8fafc;
+    --text-dark: #1e293b;
+    --text-light: #f8fafc;
+    --error-color: #dc2626;
+    --error-bg: #fee2e2;
+    --success-color: #16a34a;
+    --success-bg: #dcfce7;
+}
+
+/* Estilos del cuerpo y fondo */
+body {
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    background: linear-gradient(135deg, rgba(16, 185, 129, 0.7) 0%, rgba(30, 58, 138, 0.9) 100%);
+    height: 100vh;
+    margin: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+/* Estilos del contenedor de login */
+.login-container {
+    width: 100%;
+    max-width: 400px;
+    padding: 20px;
+}
+
+/* Estilos de la tarjeta de login */
+.login-card {
+    background-color: white;
+    border-radius: 10px;
+    box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
+    padding: 40px;
+    width: 100%;
+}
+
+/* Estilos del logo */
+.login-logo {
+    max-width: 200px;
+    margin-bottom: 30px;
+}
+
+/* Estilos para los campos de formulario */
+.form-control:focus {
+    box-shadow: 0 0 0 0.25rem rgba(30, 58, 138, 0.25);
+    border-color: var(--primary-color);
+}
+
+/* Estilos para el botón de login */
+.btn-primary {
+    background-color: var(--primary-color);
+    border-color: var(--primary-color);
+}
+
+.btn-primary:hover {
+    background-color: #152d69;
+    border-color: #152d69;
+}
+
+/* Estilos para el botón de mostrar/ocultar contraseña */
+.btn-outline-secondary {
+    color: var(--primary-color);
+    border-color: #ced4da;
+}
+
+.btn-outline-secondary:hover {
+    background-color: #f8f9fa;
+    color: var(--primary-color);
+}
+
+/* Estilos para mensajes de alerta */
+.alert-message {
+    padding: 12px 15px;
+    border-radius: 6px;
+    margin-bottom: 20px;
+    text-align: center;
+    font-size: 0.9rem;
+    font-weight: 500;
+    transition: all 0.3s ease;
+    animation: fadeIn 0.5s;
+}
+
+.alert-error {
+    background-color: var(--error-bg);
+    color: var(--error-color);
+    border: 1px solid #fecaca;
+}
+
+.alert-success {
+    background-color: var(--success-bg);
+    color: var(--success-color);
+    border: 1px solid #bbf7d0;
+}
+
+@keyframes fadeIn {
+    from { opacity: 0; transform: translateY(-10px); }
+    to { opacity: 1; transform: translateY(0); }
+}

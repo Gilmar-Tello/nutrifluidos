@@ -1,0 +1,75 @@
+/* Estilos específicos para la página de usuarios */
+
+/* Estilos para los badges de estado */
+.badge-status {
+    padding: 5px 10px;
+    border-radius: 20px;
+    font-size: 12px;
+    font-weight: 500;
+}
+
+.badge-active {
+    background-color: #d1fae5;
+    color: #065f46;
+}
+
+.badge-inactive {
+    background-color: #fee2e2;
+    color: #991b1b;
+}
+
+
+
+/* Estilos para los botones de acción en la tabla */
+.action-buttons .btn {
+    padding: 0.25rem 0.5rem;
+    font-size: 0.75rem;
+    margin-right: 0.25rem;
+}
+
+.action-buttons .btn:last-child {
+    margin-right: 0;
+}
+
+/* Estilo para encabezados de modales */
+.modal-header {
+    background-color: var(--primary-color);
+    color: white;
+}
+
+/* Estilos para los formularios dentro de los modales */
+.modal-body .form-label {
+    font-weight: 500;
+}
+
+.modal-body .form-control:focus, 
+.modal-body .form-select:focus {
+    border-color: var(--primary-color);
+    box-shadow: 0 0 0 0.25rem rgba(30, 58, 138, 0.25);
+}
+
+/* Estilo para tabla con hover */
+.table-hover tbody tr:hover {
+    background-color: rgba(30, 58, 138, 0.05);
+}
+
+/* Estilos responsivos específicos para la página de usuarios */
+@media (max-width: 992px) {
+    .action-buttons {
+        display: flex;
+        justify-content: center;
+    }
+}
+
+@media (max-width: 768px) {
+    .badge-status {
+        padding: 4px 8px;
+        font-size: 11px;
+    }
+}
+
+/* Estilos para el botón de mostrar/ocultar contraseña */
+.btn-outline-secondary {
+    color: var(--primary-color);
+    border-color: #ced4da;
+}

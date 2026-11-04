@@ -1,0 +1,9 @@
+# Datos privados (SEGURIDAD 16-09-2026): nada se sirve por URL directa.
+# El acceso es solo por php/archivo.php y los descargadores con sesión.
+<IfModule mod_authz_core.c>
+    Require all denied
+</IfModule>
+<IfModule !mod_authz_core.c>
+    Order allow,deny
+    Deny from all
+</IfModule>
