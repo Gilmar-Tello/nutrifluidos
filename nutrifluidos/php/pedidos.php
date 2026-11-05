@@ -213,7 +213,10 @@ $fecha_sort = $pedido['fecha_pedido']; // Para ordenar (YYYY-MM-DD)
                         break;
                         
                     case 'entregado':
-                        // Solo VER para pedidos entregados
+                        // VER y MODIFICAR (se permite corregir pedidos ya entregados)
+                        $acciones .= '<button type="button" class="btn btn-outline-info" onclick="editarPedido(' . $pedido['id'] . ')" title="Modificar">
+                                        <i class="fas fa-edit"></i>
+                                      </button>';
                         break;
                         
                     case 'cancelado':
@@ -415,11 +418,11 @@ function obtenerDetallePedido($conexion, $pedido_id) {
         throw new Exception('Pedido no encontrado');
     }
     
-    // Validar que el pedido se pueda modificar (solo pendiente, empacado y enviado)
-$estados_editables = ['pendiente', 'empacado', 'enviado'];
+    // Validar que el pedido se pueda modificar (05-11-2026: ahora incluye entregado; solo cancelado queda bloqueado)
+$estados_editables = ['pendiente', 'empacado', 'enviado', 'entregado'];
 
 if (!in_array($pedido['estado'], $estados_editables)) {
-    throw new Exception('No se pueden modificar pedidos en estado ' . $pedido['estado'] . '. Solo se permiten modificaciones en pedidos pendientes, empacados o enviados.');
+    throw new Exception('No se pueden modificar pedidos en estado ' . $pedido['estado'] . '. Solo se permiten modificaciones en pedidos pendientes, empacados, enviados o entregados.');
 }
     
     $pedido['dte'] = $pedido['dte_venta'];
@@ -509,9 +512,9 @@ function modificarPedido($conexion, $input) {
         $stmt->execute();
         $pedido = $stmt->get_result()->fetch_assoc();
         
-        // N5 (16-09-2026): un pedido entregado o cancelado ya no se puede editar,
-        // para no descuadrar inventario ni créditos ya cobrados.
-        $estados_editables = ['pendiente', 'empacado', 'enviado'];
+        // 05-11-2026: se vuelve a permitir editar pedidos ENTREGADOS (solo cancelados quedan bloqueados).
+        // La guardia de saldo negativo (más abajo) sigue protegiendo los créditos ya cobrados.
+        $estados_editables = ['pendiente', 'empacado', 'enviado', 'entregado'];
         
         if (!$pedido) {
             throw new Exception('Pedido no encontrado');
@@ -520,7 +523,7 @@ function modificarPedido($conexion, $input) {
             throw new Exception('No se puede modificar el pedido de una venta anulada.');
         }
         if (!in_array($pedido['estado'], $estados_editables)) {
-            throw new Exception('No se pueden modificar pedidos en estado ' . $pedido['estado'] . '. Solo se permiten modificaciones en pedidos pendientes, empacados o enviados.');
+            throw new Exception('No se pueden modificar pedidos en estado ' . $pedido['estado'] . '. Solo se permiten modificaciones en pedidos pendientes, empacados, enviados o entregados.');
         }
         
         $venta_id = $pedido['venta_id'];
